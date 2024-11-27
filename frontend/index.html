@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Movie Explorer</h1>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <form id="search-form" class="search-box">
+                <input type="text" id="search-input" placeholder="영화 검색...">
+                <button type="submit">검색</button>
+            </form>
+
+            <div class="filter-group">
+                <label>개봉 상태:</label>
+                <select id="release-status-select">
+                    <option value="all">전체</option>
+                    <option value="released">개봉작</option>
+                    <option value="upcoming">개봉예정작</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>장르:</label>
+                <div class="genre-checkboxes">
+                    <label><input type="checkbox" name="genre" value="28"> 액션</label>
+                    <label><input type="checkbox" name="genre" value="12"> 모험</label>
+                    <label><input type="checkbox" name="genre" value="16"> 애니메이션</label>
+                    <label><input type="checkbox" name="genre" value="35"> 코미디</label>
+                    <label><input type="checkbox" name="genre" value="80"> 범죄</label>
+                    <label><input type="checkbox" name="genre" value="99"> 다큐멘터리</label>
+                    <label><input type="checkbox" name="genre" value="18"> 드라마</label>
+                    <label><input type="checkbox" name="genre" value="10751"> 가족</label>
+                    <label><input type="checkbox" name="genre" value="14"> 판타지</label>
+                    <label><input type="checkbox" name="genre" value="36"> 역사</label>
+                    <label><input type="checkbox" name="genre" value="27"> 공포</label>
+                    <label><input type="checkbox" name="genre" value="10402"> 음악</label>
+                    <label><input type="checkbox" name="genre" value="9648"> 미스터리</label>
+                    <label><input type="checkbox" name="genre" value="10749"> 로맨스</label>
+                    <label><input type="checkbox" name="genre" value="878"> SF</label>
+                    <label><input type="checkbox" name="genre" value="10770"> TV 영화</label>
+                    <label><input type="checkbox" name="genre" value="53"> 스릴러</label>
+                    <label><input type="checkbox" name="genre" value="10752"> 전쟁</label>
+                    <label><input type="checkbox" name="genre" value="37"> 서부</label>
+                </div>
+            </div>
+
+            <select id="country-select">
+                <option value="">모든 국가</option>
+                <option value="KR">한국</option>
+                <option value="US">미국</option>
+                <option value="JP">일본</option>
+                <option value="CN">중국</option>
+                <option value="GB">영국</option>
+                <option value="FR">프랑스</option>
+                <option value="DE">독일</option>
+                <option value="IT">이탈리아</option>
+                <option value="ES">스페인</option>
+                <option value="IN">인도</option>
+                <option value="CA">캐나다</option>
+                <option value="AU">호주</option>
+                <option value="BR">브라질</option>
+                <option value="MX">멕시코</option>
+                <option value="RU">러시아</option>
+            </select>
+
+            <select id="sort-select">
+                <option value="release_date.desc">최신순</option>
+                <option value="vote_average.desc">평점순</option>
+                <option value="popularity.desc">인기순</option>
+            </select>
+        </div>
+
+        <div id="movies-container" class="movies-grid"></div>
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <div id="movie-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="movie-detail" class="movie-detail"></div>
+        </div>
+    </div>
+
+    <script src="app.js" type="module"></script>
+</body>
+</html>
