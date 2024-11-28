@@ -10,9 +10,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const cache = new NodeCache({ stdTTL: 7200 }); // Cache for 2 hours
-const TMDB_API_KEY = 'd3f12b840887bf5a36dbacd9af040917'; // TMDB API 키
+const TMDB_API_KEY = process.env.TMDB_API_KEY; // API 키를 환경 변수로 이동
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const PORT = process.env.PORT || 3000;
+
+// API 키 확인
+if (!TMDB_API_KEY) {
+    console.error('TMDB_API_KEY is not set in environment variables');
+    process.exit(1);
+}
 
 // CORS 설정
 app.use(cors({

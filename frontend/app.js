@@ -147,8 +147,8 @@ function displayMovies(movies) {
         movieCard.className = 'movie-card';
         
         const posterPath = movie.poster_path
-            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-            : 'https://via.placeholder.com/300x450.png?text=No+Poster';
+            ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` // 포스터 크기 최적화
+            : 'https://via.placeholder.com/342x513.png?text=No+Poster';
 
         const releaseDate = movie.release_date 
             ? new Date(movie.release_date).toLocaleDateString('ko-KR', {
@@ -159,13 +159,25 @@ function displayMovies(movies) {
             : '미정';
 
         movieCard.innerHTML = `
-            <img src="${posterPath}" alt="${movie.title}" class="movie-poster" loading="lazy">
+            <div class="movie-poster-container">
+                <img src="${posterPath}" alt="${movie.title}" class="movie-poster" loading="lazy">
+                <div class="movie-hover-info">
+                    <p class="movie-overview">${movie.overview || '줄거리 없음'}</p>
+                    <button class="view-details-btn">상세 정보</button>
+                </div>
+            </div>
             <div class="movie-info">
                 <h3 title="${movie.title}">${movie.title}</h3>
                 <p>평점: ${movie.vote_average.toFixed(1)}</p>
                 <p>개봉일: ${releaseDate}</p>
             </div>
         `;
+
+        const viewDetailsBtn = movieCard.querySelector('.view-details-btn');
+        viewDetailsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showMovieDetails(movie.id);
+        });
 
         movieCard.addEventListener('click', () => showMovieDetails(movie.id));
         movieGrid.appendChild(movieCard);
