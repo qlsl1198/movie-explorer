@@ -4,6 +4,10 @@ import fetch from 'node-fetch';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
+import dotenv from 'dotenv';
+
+// .env 파일 로드
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
