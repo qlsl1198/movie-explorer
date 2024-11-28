@@ -7,7 +7,7 @@ import NodeCache from 'node-cache';
 import dotenv from 'dotenv';
 
 // .env 파일 로드
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -174,17 +174,48 @@ app.get('/api/movies', async (req, res) => {
         }
 
         if (region && region !== 'all') {
-            params.set('region', region);
+            // 지역 기반 검색 파라미터 설정
             params.append('with_origin_country', region);
             
-            // 한국 영화의 경우 더 많은 결과를 위해 추가 설정
+            // 한국 영화의 경우 추가 파라미터
             if (region === 'KR') {
+                params.append('with_original_language', 'ko');
+                // 한국에서 제작 또는 배급된 영화 포함
                 params.append('certification_country', 'KR');
+                // 투표 수 제한 낮춤 (한국 영화는 TMDB에서 투표가 적을 수 있음)
+                params.set('vote_count.gte', 0);
+                // 한국어로 검색
+                params.set('language', 'ko-KR');
+            } else if (region === 'JP') {
+                params.append('with_original_language', 'ja');
+            } else if (region === 'CN') {
+                params.append('with_original_language', ['zh', 'cn'].join('|'));
             }
+            
+            // 해당 국가에서 개봉된 영화도 포함
+            params.append('region', region);
         }
 
         if (query) {
             params.append('query', query);
+            // 검색어가 있을 경우 지역 설정
+            if (region && region !== 'all') {
+                params.append('region', region);
+                // 한국어 검색 최적화
+                if (region === 'KR') {
+                    params.set('language', 'ko-KR');
+                    // 한국어 검색어에 대해 원어 제목도 검색
+                    if (endpoint === 'search/movie') {
+                        params.append('include_adult', 'false');
+                        params.append('include_video', 'false');
+                        params.set('vote_count.gte', 0);
+                    }
+                } else if (region === 'JP') {
+                    params.set('language', 'ja-JP');
+                } else if (region === 'CN') {
+                    params.set('language', 'zh-CN');
+                }
+            }
         }
 
         // 캐시 방지를 위한 타임스탬프 추가
@@ -206,16 +237,42 @@ app.get('/api/movies', async (req, res) => {
             total_pages: Math.min(data.total_pages, 100),
             total_results: data.total_results,
             results: data.results
-                .filter(movie => movie.title && (movie.poster_path || movie.backdrop_path))
+                .filter(movie => {
+                    // 기본적인 유효성 검사
+                    if (!movie.title) return false;
+                    
+                    // 국가별 필터링
+                    if (region && region !== 'all') {
+                        // 제작 국가 확인
+                        const isFromRegion = movie.production_countries?.some(country => 
+                            country.iso_3166_1 === region
+                        ) || movie.origin_country?.includes(region);
+                        
+                        // 원어 확인
+                        const hasCorrectLanguage = (
+                            (region === 'KR' && movie.original_language === 'ko') ||
+                            (region === 'JP' && movie.original_language === 'ja') ||
+                            (region === 'CN' && ['zh', 'cn'].includes(movie.original_language)) ||
+                            (!['KR', 'JP', 'CN'].includes(region))
+                        );
+                        
+                        return isFromRegion || hasCorrectLanguage;
+                    }
+                    
+                    return true;
+                })
                 .map(movie => ({
                     id: movie.id,
                     title: movie.title,
+                    original_title: movie.original_title,
                     poster_path: movie.poster_path,
                     backdrop_path: movie.backdrop_path,
+                    overview: movie.overview,
                     release_date: movie.release_date,
                     vote_average: movie.vote_average,
-                    overview: movie.overview,
-                    popularity: movie.popularity
+                    original_language: movie.original_language,
+                    production_countries: movie.production_countries,
+                    genre_ids: movie.genre_ids
                 }))
         };
 
@@ -233,52 +290,51 @@ app.get('/api/movies', async (req, res) => {
     }
 });
 
-// 영화 상세 정보 API
+// 영화 상세 정보 엔드포인트
 app.get('/api/movies/:id', async (req, res) => {
     try {
         const movieId = req.params.id;
-
-        // 영화 상세 정보와 출연진 정보를 동시에 가져오기
-        const [movieResponse, creditsResponse] = await Promise.all([
-            fetch(`${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=ko-KR`),
-            fetch(`${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}&language=ko-KR`)
-        ]);
-
-        if (!movieResponse.ok || !creditsResponse.ok) {
-            throw new Error('영화 정보를 가져오는데 실패했습니다.');
+        const cacheKey = `movie_${movieId}`;
+        
+        // 캐시된 데이터 확인
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {
+            return res.json(cachedData);
         }
 
-        const [movieData, creditsData] = await Promise.all([
-            movieResponse.json(),
-            creditsResponse.json()
-        ]);
+        // 영화 상세 정보와 출연진 정보를 가져오기
+        const movieUrl = `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=ko-KR`;
+        const creditsUrl = `${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}&language=ko-KR`;
 
-        // 주요 출연진 (최대 5명)과 감독 정보 추출
-        const mainCast = creditsData.cast
-            .slice(0, 5)
-            .map(actor => ({
-                name: actor.name,
-                character: actor.character,
-                profile_path: actor.profile_path
-            }));
+        try {
+            const [movieResponse, creditsResponse] = await Promise.all([
+                fetch(movieUrl),
+                fetch(creditsUrl)
+            ]);
 
-        const director = creditsData.crew.find(person => person.job === 'Director');
+            if (!movieResponse.ok || !creditsResponse.ok) {
+                throw new Error('영화 정보를 가져오는데 실패했습니다.');
+            }
 
-        // 응답 데이터 구성
-        const result = {
-            ...movieData,
-            cast: mainCast,
-            director: director ? director.name : null
-        };
+            const [movieData, creditsData] = await Promise.all([
+                movieResponse.json(),
+                creditsResponse.json()
+            ]);
 
-        res.set({
-            'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-            'Expires': '-1',
-            'Pragma': 'no-cache'
-        });
+            // 응답 데이터 구성
+            const responseData = {
+                ...movieData,
+                credits: creditsData
+            };
 
-        res.json(result);
+            // 캐시에 저장 (2시간)
+            cache.set(cacheKey, responseData, 7200);
 
+            res.json(responseData);
+        } catch (error) {
+            console.error('Error fetching movie data:', error);
+            throw error;
+        }
     } catch (error) {
         console.error('Error in /api/movies/:id:', error);
         res.status(500).json({ error: '영화 상세 정보를 가져오는데 실패했습니다.' });

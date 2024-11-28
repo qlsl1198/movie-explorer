@@ -147,7 +147,7 @@ function displayMovies(movies) {
         movieCard.className = 'movie-card';
         
         const posterPath = movie.poster_path
-            ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` // 포스터 크기 최적화
+            ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
             : 'https://via.placeholder.com/342x513.png?text=No+Poster';
 
         const releaseDate = movie.release_date 
@@ -158,26 +158,21 @@ function displayMovies(movies) {
               })
             : '미정';
 
+        // 제목 표시 로직
+        const displayTitle = movie.title;
+        const originalTitle = movie.original_title !== movie.title ? movie.original_title : '';
+        
         movieCard.innerHTML = `
             <div class="movie-poster-container">
                 <img src="${posterPath}" alt="${movie.title}" class="movie-poster" loading="lazy">
-                <div class="movie-hover-info">
-                    <p class="movie-overview">${movie.overview || '줄거리 없음'}</p>
-                    <button class="view-details-btn">상세 정보</button>
-                </div>
             </div>
             <div class="movie-info">
-                <h3 title="${movie.title}">${movie.title}</h3>
+                <h3 title="${movie.title}">${displayTitle}</h3>
+                ${originalTitle ? `<p class="original-title">${originalTitle}</p>` : ''}
                 <p>평점: ${movie.vote_average.toFixed(1)}</p>
                 <p>개봉일: ${releaseDate}</p>
             </div>
         `;
-
-        const viewDetailsBtn = movieCard.querySelector('.view-details-btn');
-        viewDetailsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showMovieDetails(movie.id);
-        });
 
         movieCard.addEventListener('click', () => showMovieDetails(movie.id));
         movieGrid.appendChild(movieCard);
@@ -221,30 +216,17 @@ function createMovieElement(movie) {
 async function showMovieDetails(movieId) {
     try {
         const response = await fetch(`/api/movies/${movieId}`);
-        if (!response.ok) {
-            throw new Error('영화 상세 정보를 가져오는데 실패했습니다.');
-        }
-
+        if (!response.ok) throw new Error('영화 정보를 가져오는데 실패했습니다.');
+        
         const movie = await response.json();
         const modal = document.getElementById('movie-modal');
-        const movieDetail = document.getElementById('movie-detail');
+        const modalContent = modal.querySelector('#movie-detail');
         
-        // 출연진 HTML 생성
-        const castHTML = movie.cast ? movie.cast.map(actor => `
-            <div class="cast-member">
-                <img src="${actor.profile_path 
-                    ? `https://image.tmdb.org/t/p/w92${actor.profile_path}`
-                    : 'https://via.placeholder.com/92x138.png?text=No+Image'}" 
-                    alt="${actor.name}" 
-                    class="cast-image">
-                <div class="cast-info">
-                    <div class="actor-name">${actor.name}</div>
-                    <div class="character-name">${actor.character}</div>
-                </div>
-            </div>
-        `).join('') : '';
-
-        const releaseDate = movie.release_date 
+        const posterPath = movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : 'https://via.placeholder.com/500x750.png?text=No+Poster';
+            
+        const releaseDate = movie.release_date
             ? new Date(movie.release_date).toLocaleDateString('ko-KR', {
                 year: 'numeric',
                 month: 'long',
@@ -252,55 +234,82 @@ async function showMovieDetails(movieId) {
               })
             : '미정';
 
-        movieDetail.innerHTML = `
-            <div class="movie-details-container">
-                <div class="movie-poster">
-                    <img src="${movie.poster_path 
-                        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                        : 'https://via.placeholder.com/500x750.png?text=No+Poster'}" 
-                        alt="${movie.title}">
+        // 감독 정보
+        const directors = movie.credits?.crew
+            ?.filter(person => person.job === 'Director')
+            ?.map(director => director.name)
+            ?.join(', ') || '정보 없음';
+
+        // 출연진 정보 (상위 10명)
+        const castList = movie.credits?.cast
+            ?.slice(0, 10)
+            ?.map(actor => `
+                <div class="cast-item">
+                    <div class="cast-image">
+                        <img src="${actor.profile_path 
+                            ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                            : 'https://via.placeholder.com/185x278.png?text=No+Image'
+                        }" alt="${actor.name}" loading="lazy">
+                    </div>
+                    <div class="cast-info">
+                        <div class="actor-name">${actor.name}</div>
+                        <div class="character-name">${actor.character}</div>
+                    </div>
                 </div>
-                <div class="movie-info">
-                    <h2>${movie.title}</h2>
+            `)
+            ?.join('') || '<p>출연진 정보가 없습니다.</p>';
+
+        // 제목 표시 로직
+        const displayTitle = movie.title;
+        const originalTitle = movie.original_title !== movie.title ? movie.original_title : '';
+        const productionCountries = movie.production_countries?.map(country => country.name).join(', ') || '정보 없음';
+
+        modalContent.innerHTML = `
+            <div class="modal-header">
+                <h2>${displayTitle}</h2>
+                ${originalTitle ? `<p class="original-title">${originalTitle}</p>` : ''}
+            </div>
+            <div class="modal-body">
+                <div class="modal-poster">
+                    <img src="${posterPath}" alt="${movie.title}">
+                </div>
+                <div class="modal-info">
                     <p><strong>개봉일:</strong> ${releaseDate}</p>
-                    <p><strong>평점:</strong> ${movie.vote_average ? movie.vote_average.toFixed(1) : '정보 없음'}</p>
-                    <p><strong>감독:</strong> ${movie.director || '정보 없음'}</p>
-                    <p><strong>장르:</strong> ${movie.genres ? movie.genres.map(genre => genre.name).join(', ') : '정보 없음'}</p>
-                    <p><strong>러닝타임:</strong> ${movie.runtime ? `${movie.runtime}분` : '정보 없음'}</p>
+                    <p><strong>평점:</strong> ${movie.vote_average.toFixed(1)}</p>
+                    <p><strong>장르:</strong> ${movie.genres?.map(g => g.name).join(', ') || '정보 없음'}</p>
+                    <p><strong>제작 국가:</strong> ${productionCountries}</p>
+                    <p><strong>러닝타임:</strong> ${movie.runtime}분</p>
+                    <p><strong>감독:</strong> ${directors}</p>
                     <div class="overview">
-                        <strong>줄거리:</strong>
+                        <h3>줄거리</h3>
                         <p>${movie.overview || '줄거리 정보가 없습니다.'}</p>
                     </div>
-                    ${movie.cast ? `
-                        <div class="cast-section">
-                            <h3>주요 출연진</h3>
-                            <div class="cast-list">
-                                ${castHTML}
-                            </div>
+                    <div class="cast-section">
+                        <h3>주요 출연진</h3>
+                        <div class="cast-grid">
+                            ${castList}
                         </div>
-                    ` : ''}
+                    </div>
                 </div>
             </div>
         `;
-
+        
         modal.style.display = 'block';
-
-        // 닫기 버튼 이벤트 리스너
+        
+        // 모달 닫기 버튼 이벤트
         const closeBtn = modal.querySelector('.close-modal');
-        closeBtn.onclick = () => {
-            modal.style.display = 'none';
-        };
-
-        // 모달 바깥 클릭시 닫기
+        closeBtn.onclick = () => modal.style.display = 'none';
+        
+        // 모달 외부 클릭 시 닫기
         window.onclick = (event) => {
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
         };
-
+        
     } catch (error) {
-        console.error('Error showing movie details:', error);
-        alert('영화 상세 정보를 불러오는데 실패했습니다.');
+        console.error('Error fetching movie details:', error);
+        showError('영화 상세 정보를 불러오는데 실패했습니다.');
     }
 }
 
@@ -332,8 +341,39 @@ function formatDate(dateString) {
     });
 }
 
+// 테마 관리
+function initTheme() {
+    // 저장된 테마 또는 시스템 테마 확인
+    const savedTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const currentTheme = savedTheme || systemTheme;
+    
+    // 테마 적용
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    
+    // 테마 토글 버튼 이벤트 리스너
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+    
+    // 시스템 테마 변경 감지
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            const newTheme = e.matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+        }
+    });
+}
+
 // 초기화 함수
 function initializeApp() {
+    initTheme(); // 테마 초기화
+    
     // 초기 영화 로드
     fetchMovies();
 
@@ -369,6 +409,32 @@ function initializeApp() {
         searchQuery = searchInput.value;
         fetchMovies(true);
     });
+
+    // 영화관/스트리밍 링크 버튼 추가
+    const headerRight = document.querySelector('.header-right');
+    if (headerRight) {
+        const ticketLinks = document.createElement('div');
+        ticketLinks.className = 'ticket-links';
+        
+        const links = [
+            { name: 'CGV', url: 'http://www.cgv.co.kr', icon: '🎬' },
+            { name: '롯데시네마', url: 'https://www.lottecinema.co.kr', icon: '🎥' },
+            { name: '메가박스', url: 'https://www.megabox.co.kr', icon: '🎦' },
+            { name: '넷플릭스', url: 'https://www.netflix.com/kr', icon: '🍿' }
+        ];
+        
+        links.forEach(link => {
+            const button = document.createElement('a');
+            button.href = link.url;
+            button.className = 'ticket-link-button';
+            button.target = '_blank';
+            button.rel = 'noopener noreferrer';
+            button.innerHTML = `${link.icon} ${link.name}`;
+            ticketLinks.appendChild(button);
+        });
+        
+        headerRight.appendChild(ticketLinks);
+    }
 }
 
 // DOMContentLoaded 이벤트에서 초기화 함수 호출
