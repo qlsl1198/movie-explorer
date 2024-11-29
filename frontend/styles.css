@@ -668,11 +668,24 @@ header h1 {
 }
 
 .cast-item {
-    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: transform 0.2s;
+}
+
+.cast-item {
+    background-color: #fff;
+    color: #333;
+}
+
+[data-theme="dark"] .cast-item {
+    background-color: #1a1a1a;
+    color: #e1e1e1;
 }
 
 .cast-item:hover {
@@ -683,6 +696,7 @@ header h1 {
     width: 100%;
     aspect-ratio: 2/3;
     overflow: hidden;
+    margin-bottom: 0;
 }
 
 .cast-image img {
@@ -693,7 +707,10 @@ header h1 {
 
 .cast-info {
     padding: 0.5rem;
+    overflow: hidden;
     text-align: center;
+    background-color: inherit;
+    margin-top: 0;
 }
 
 .actor-name {
@@ -729,10 +746,14 @@ header h1 {
     }
 }
 
-[data-theme="dark"] .cast-info .cast-name {
-    background-color: #242424;
-    color: #e1e1e1;
+[data-theme="dark"] .cast-info {
+    background-color: #1a1a1a;
     border: 1px solid #333;
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] .cast-info .cast-name {
+    color: #ffffff;
 }
 
 [data-theme="dark"] .cast-info .cast-character {
@@ -1401,5 +1422,10 @@ header h1 {
 }
 
 [data-theme="dark"] .modal-header h2 {
+    color: #ffffff;
+}
+
+/* 줄거리 정보의 내용 글씨 색상을 흰색으로 변경 */
+[data-theme="dark"] .overview p {
     color: #ffffff;
 }
