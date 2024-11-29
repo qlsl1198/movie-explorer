@@ -1363,3 +1363,13 @@ header h1 {
     background-color: #2196F3;
     border-color: #2196F3;
 }
+
+[data-theme="dark"] .genre-checkboxes label {
+    background-color: #1d1d1d;
+    border: 1px solid #333;
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] .genre-checkboxes label:hover {
+    background-color: #242424;
+}
