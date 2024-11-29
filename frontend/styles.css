@@ -39,6 +39,10 @@ header h1 {
     color: #2c3e50;
 }
 
+[data-theme="dark"] header h1 {
+    color: #ffffff;
+}
+
 .theme-toggle {
     position: relative;
     padding: 10px;
@@ -1228,4 +1232,12 @@ header h1 {
         flex-wrap: wrap;
         justify-content: flex-start;
     }
+}
+
+[data-theme="dark"] header h1 {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .movie-detail h2 {
+    color: #ffffff;
 }
