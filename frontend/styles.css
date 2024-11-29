@@ -729,6 +729,16 @@ header h1 {
     }
 }
 
+[data-theme="dark"] .cast-info .cast-name {
+    background-color: #242424;
+    color: #e1e1e1;
+    border: 1px solid #333;
+}
+
+[data-theme="dark"] .cast-info .cast-character {
+    color: #b0b0b0;
+}
+
 /* 티켓 링크 버튼 스타일 */
 .ticket-links {
     display: flex;
@@ -996,7 +1006,7 @@ header h1 {
 }
 
 [data-theme="dark"] .genre-checkboxes {
-    background-color: #2d2d2d;
+    background-color: #121212;
     border: 1px solid #2a2a2a;
 }
 
@@ -1026,6 +1036,220 @@ header h1 {
 [data-theme="dark"] .filter-group input[type="checkbox"]:checked {
     background-color: #2196F3;
     border-color: #2196F3;
+}
+
+/* 다크모드 변수 */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --card-border: #e0e0e0;
+    --header-bg: #ffffff;
+    --modal-bg: #ffffff;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --button-bg: #ffffff;
+    --button-border: #dddddd;
+    --button-hover: #f8f8f8;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --card-bg: #2d2d2d;
+    --card-border: #404040;
+    --header-bg: #2d2d2d;
+    --modal-bg: #2d2d2d;
+    --modal-overlay: rgba(0, 0, 0, 0.7);
+    --button-bg: #333;
+    --button-border: #505050;
+    --button-hover: #4a4a4a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* 다크모드 전역 스타일 */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --card-bg: #1d1d1d;
+    --input-bg: #242424;
+    --button-bg: #333;
+    --button-border: #333;
+    --button-hover: #444;
+    --border-color: #333;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] button {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] input:hover,
+[data-theme="dark"] select:hover,
+[data-theme="dark"] button:hover {
+    background-color: var(--button-hover);
+}
+
+[data-theme="dark"] .movies-grid {
+    background-color: var(--bg-color);
+}
+
+[data-theme="dark"] .movie-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .movie-card:hover {
+    background-color: var(--input-bg);
+}
+
+[data-theme="dark"] .filters {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .genre-checkboxes {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .pagination {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .page-button {
+    background-color: var(--button-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .page-button:hover {
+    background-color: var(--button-hover);
+}
+
+[data-theme="dark"] .page-button.active {
+    background-color: #1a1a1a;
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .search-box {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-group {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .theme-toggle {
+    background-color: var(--button-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background-color: var(--button-hover);
+}
+
+[data-theme="dark"] input[type="checkbox"] {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] input[type="checkbox"]:checked {
+    background-color: var(--button-hover);
+}
+
+/* 외부 링크 스타일 */
+.external-links {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.external-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--button-bg);
+    border: 1px solid var(--button-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.external-link:hover {
+    background-color: var(--button-hover);
+    border-color: var(--checkbox-checked);
+}
+
+.external-link i {
+    margin-right: 0.5rem;
+}
+
+/* 다크모드 외부 링크 스타일 */
+[data-theme="dark"] .external-link {
+    background-color: var(--button-bg);
+    border-color: var(--button-border);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .external-link:hover {
+    background-color: var(--button-hover);
+    border-color: var(--checkbox-checked);
+}
+
+/* 모바일 반응형 스타일 */
+@media screen and (max-width: 768px) {
+    .external-links {
+        flex-direction: row;
+        justify-content: center;
+        padding: 0.5rem;
+        gap: 0.5rem;
+        margin: 0.5rem 0;
+    }
+
+    .external-link {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        flex: 0 1 auto;
+        white-space: nowrap;
+    }
+
+    .movie-details .external-links {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+}
+
+[data-theme="dark"] header h1 {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .movie-detail h2 {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+}
+
+[data-theme="dark"] .movie-detail {
+    background-color: #1a1a1a;
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] .movie-info {
+    background-color: #242424;
+    border: 1px solid #333;
+}
+
+[data-theme="dark"] .movie-info-item {
+    border-bottom: 1px solid #333;
 }
 
 /* 다크모드 스타일 */
@@ -1138,106 +1362,4 @@ header h1 {
 [data-theme="dark"] .filter-group input[type="checkbox"]:checked {
     background-color: #2196F3;
     border-color: #2196F3;
-}
-
-/* 다크모드 변수 */
-:root {
-    --bg-color: #ffffff;
-    --text-color: #333333;
-    --card-bg: #ffffff;
-    --card-border: #e0e0e0;
-    --header-bg: #ffffff;
-    --modal-bg: #ffffff;
-    --modal-overlay: rgba(0, 0, 0, 0.5);
-    --button-bg: #ffffff;
-    --button-border: #dddddd;
-    --button-hover: #f8f8f8;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="dark"] {
-    --bg-color: #1a1a1a;
-    --text-color: #ffffff;
-    --card-bg: #2d2d2d;
-    --card-border: #404040;
-    --header-bg: #2d2d2d;
-    --modal-bg: #2d2d2d;
-    --modal-overlay: rgba(0, 0, 0, 0.7);
-    --button-bg: #3d3d3d;
-    --button-border: #505050;
-    --button-hover: #4a4a4a;
-    --shadow-color: rgba(0, 0, 0, 0.3);
-}
-
-/* 외부 링크 스타일 */
-.external-links {
-    display: flex;
-    gap: 1rem;
-    margin: 1rem 0;
-    flex-wrap: wrap;
-}
-
-.external-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    background-color: var(--button-bg);
-    border: 1px solid var(--button-border);
-    border-radius: 4px;
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.external-link:hover {
-    background-color: var(--button-hover);
-    border-color: var(--checkbox-checked);
-}
-
-.external-link i {
-    margin-right: 0.5rem;
-}
-
-/* 다크모드 외부 링크 스타일 */
-[data-theme="dark"] .external-link {
-    background-color: var(--button-bg);
-    border-color: var(--button-border);
-    color: var(--text-color);
-}
-
-[data-theme="dark"] .external-link:hover {
-    background-color: var(--button-hover);
-    border-color: var(--checkbox-checked);
-}
-
-/* 모바일 반응형 스타일 */
-@media screen and (max-width: 768px) {
-    .external-links {
-        flex-direction: row;
-        justify-content: center;
-        padding: 0.5rem;
-        gap: 0.5rem;
-        margin: 0.5rem 0;
-    }
-
-    .external-link {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-        flex: 0 1 auto;
-        white-space: nowrap;
-    }
-
-    .movie-details .external-links {
-        flex-wrap: wrap;
-        justify-content: flex-start;
-    }
-}
-
-[data-theme="dark"] header h1 {
-    color: #ffffff;
-}
-
-[data-theme="dark"] .movie-detail h2 {
-    color: #ffffff;
 }
