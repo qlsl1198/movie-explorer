@@ -1038,6 +1038,26 @@ header h1 {
     border-color: #2196F3;
 }
 
+[data-theme="dark"] .genre-checkboxes label {
+    background-color: #1d1d1d;
+    border: 1px solid #333;
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] .genre-checkboxes label:hover {
+    background-color: #242424;
+}
+
+[data-theme="dark"] .movie-title-box {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] .movie-title-box h2 {
+    color: #ffffff;
+}
+
 /* 다크모드 변수 */
 :root {
     --bg-color: #ffffff;
@@ -1372,4 +1392,14 @@ header h1 {
 
 [data-theme="dark"] .genre-checkboxes label:hover {
     background-color: #242424;
+}
+
+[data-theme="dark"] .modal-header {
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #333;
+    color: #e1e1e1;
+}
+
+[data-theme="dark"] .modal-header h2 {
+    color: #ffffff;
 }
