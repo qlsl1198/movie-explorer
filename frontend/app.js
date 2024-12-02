@@ -370,10 +370,26 @@ function initTheme() {
     });
 }
 
+// 서버 연결 유지 함수
+function keepAlive() {
+    // 8분(480000ms)마다 서버에 요청을 보냄
+    setInterval(() => {
+        fetch('/api/movies?page=1&_t=' + Date.now(), {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        }).catch(error => console.log('Keep-alive request failed:', error));
+    }, 480000);
+}
+
 // 초기화 함수
 function initializeApp() {
     initTheme(); // 테마 초기화
     
+    // 서버 연결 유지 기능 시작
+    keepAlive();
+
     // 초기 영화 로드
     fetchMovies();
 
