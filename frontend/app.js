@@ -380,7 +380,7 @@ function keepAlive() {
                 'Pragma': 'no-cache'
             }
         }).catch(error => console.log('Keep-alive request failed:', error));
-    }, 480000);
+    }, 300000);
 }
 
 // 초기화 함수
