@@ -24,11 +24,11 @@ function handleScroll() {
     if (!isMobile || isLoading || !hasMorePages) return;
 
     const scrollHeight = document.documentElement.scrollHeight;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollTop = window.scrollY;
     const clientHeight = document.documentElement.clientHeight;
 
-    // 스크롤이 하단에서 100px 이내일 때 다음 페이지 로드
     if (scrollHeight - scrollTop - clientHeight < 100) {
+        currentPage++;
         fetchMovies(false, true);
     }
 }
@@ -62,7 +62,7 @@ async function fetchMovies(resetPage = false, append = false) {
             params.append('genre', selectedGenres);
         }
 
-        if (countrySelect.value) {
+        if (countrySelect.value !== 'all') {
             params.append('region', countrySelect.value);
         }
 
@@ -94,49 +94,88 @@ async function fetchMovies(resetPage = false, append = false) {
             return;
         }
 
-        // 현재 페이지가 마지막 페이지인지 확인
-        hasMorePages = currentPage < Math.min(data.total_pages, 100);
-        
-        if (!append) {
-            moviesContainer.innerHTML = '';
-        }
-        
+        hasMorePages = currentPage < data.total_pages;
         displayMovies(data.results, append);
-        
         if (!isMobile) {
             updatePagination(data.total_pages);
         }
-
-        // 모바일에서 스크롤 이벤트 처리를 위해 다음 페이지 준비
-        if (isMobile && hasMorePages) {
-            currentPage++;
-        }
+        hideLoading();
 
     } catch (error) {
         console.error('Error fetching movies:', error);
         showError(error.message);
-    } finally {
-        isLoading = false;
         hideLoading();
     }
 }
 
+// 페이지네이션 업데이트
+function updatePagination(totalPages) {
+    paginationContainer.innerHTML = '';
+    
+    // 최대 100페이지로 제한
+    totalPages = Math.min(totalPages, 100);
+    
+    if (totalPages <= 1) {
+        return;
+    }
+
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    // 시작 페이지 조정
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // 첫 페이지 버튼
+    if (startPage > 1) {
+        addPageButton(1, '처음');
+        if (startPage > 2) {
+            paginationContainer.appendChild(document.createTextNode('...'));
+        }
+    }
+
+    // 페이지 버튼
+    for (let i = startPage; i <= endPage; i++) {
+        addPageButton(i);
+    }
+
+    // 마지막 페이지 버튼
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationContainer.appendChild(document.createTextNode('...'));
+        }
+        addPageButton(totalPages, '마지막');
+    }
+}
+
+// 페이지 버튼 추가
+function addPageButton(pageNum, label = pageNum) {
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.classList.add('page-button');
+    if (pageNum === currentPage) {
+        button.classList.add('active');
+    }
+    button.addEventListener('click', () => {
+        if (pageNum !== currentPage) {
+            currentPage = pageNum;
+            fetchMovies();
+        }
+    });
+    paginationContainer.appendChild(button);
+}
+
 // 영화 표시
 function displayMovies(movies, append = false) {
-    let movieGrid;
-    
-    if (append) {
-        movieGrid = moviesContainer.querySelector('.movie-grid');
-        if (!movieGrid) {
-            movieGrid = document.createElement('div');
-            movieGrid.className = 'movie-grid';
-            moviesContainer.appendChild(movieGrid);
-        }
-    } else {
+    if (!append) {
         moviesContainer.innerHTML = '';
-        movieGrid = document.createElement('div');
+    }
+    
+    const movieGrid = append ? moviesContainer.querySelector('.movie-grid') : document.createElement('div');
+    if (!append) {
         movieGrid.className = 'movie-grid';
-        moviesContainer.appendChild(movieGrid);
     }
 
     movies.forEach(movie => {
@@ -172,7 +211,12 @@ function displayMovies(movies, append = false) {
         `;
 
         movieCard.addEventListener('click', () => showMovieDetails(movie.id));
-        movieGrid.appendChild(movieCard);
+        if (append) {
+            movieGrid.appendChild(movieCard);
+        } else {
+            movieGrid.appendChild(movieCard);
+            moviesContainer.appendChild(movieGrid);
+        }
     });
 }
 
