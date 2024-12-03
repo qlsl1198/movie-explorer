@@ -12,6 +12,15 @@ let searchQuery = '';
 let isLoading = false;
 let isMobile = window.innerWidth <= 768;
 let hasMorePages = true;
+let totalResults = 0;
+
+// 필터 변경 이벤트 핸들러
+function handleFilterChange() {
+    currentPage = 1;
+    hasMorePages = true;
+    totalResults = 0;
+    fetchMovies(true);
+}
 
 // 모바일 여부 체크 함수
 function checkMobile() {
@@ -24,10 +33,11 @@ function handleScroll() {
     if (!isMobile || isLoading || !hasMorePages) return;
 
     const scrollHeight = document.documentElement.scrollHeight;
-    const scrollTop = window.scrollY;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const clientHeight = document.documentElement.clientHeight;
 
-    if (scrollHeight - scrollTop - clientHeight < 100) {
+    // 스크롤이 하단에서 200px 이내일 때 다음 페이지 로드
+    if (scrollHeight - scrollTop - clientHeight < 200) {
         fetchMovies(false, true);
     }
 }
@@ -37,31 +47,31 @@ async function fetchMovies(resetPage = false, append = false) {
     if (resetPage) {
         currentPage = 1;
         hasMorePages = true;
+        totalResults = 0;
     }
 
-    if (isLoading) return;
+    if (isLoading || (!append && !resetPage && !hasMorePages)) return;
+    
     isLoading = true;
     showLoading();
 
     try {
-        // 선택된 장르들 가져오기
         const selectedGenres = Array.from(document.querySelectorAll('.genre-checkboxes input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value)
             .join(',');
         
-        // API 요청 파라미터 설정
         const params = new URLSearchParams({
             page: currentPage,
             sort: sortSelect.value,
             release_status: releaseStatusSelect.value,
-            _t: Date.now() // 캐시 방지를 위한 타임스탬프
+            _t: Date.now()
         });
 
         if (selectedGenres) {
             params.append('genre', selectedGenres);
         }
 
-        if (countrySelect.value !== 'all') {
+        if (countrySelect.value && countrySelect.value !== 'all') {
             params.append('region', countrySelect.value);
         }
 
@@ -69,22 +79,16 @@ async function fetchMovies(resetPage = false, append = false) {
             params.append('query', searchQuery);
         }
 
-        console.log('Fetching movies with params:', Object.fromEntries(params));
+        console.log('Fetching movies:', currentPage, append ? 'append' : 'reset');
 
-        const response = await fetch(`/api/movies?${params}`, {
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
-        });
-
+        const response = await fetch(`/api/movies?${params}`);
         if (!response.ok) {
             throw new Error('영화를 불러오는데 실패했습니다.');
         }
 
         const data = await response.json();
         
-        if (data.results.length === 0) {
+        if (!data.results || data.results.length === 0) {
             if (!append) {
                 moviesContainer.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
                 paginationContainer.innerHTML = '';
@@ -93,41 +97,41 @@ async function fetchMovies(resetPage = false, append = false) {
             return;
         }
 
-        // 최대 100페이지로 제한
-        const maxPages = Math.min(data.total_pages, 100);
+        totalResults = data.total_results || 0;
+        const maxPages = Math.min(Math.ceil(totalResults / moviesPerPage), 100);
         hasMorePages = currentPage < maxPages;
+
+        if (resetPage) {
+            moviesContainer.innerHTML = '';
+        }
 
         displayMovies(data.results, append);
         
         if (!isMobile) {
             updatePagination(maxPages);
         } else if (hasMorePages) {
-            // 모바일에서만 다음 페이지 준비
             currentPage++;
         }
-
-        hideLoading();
 
     } catch (error) {
         console.error('Error fetching movies:', error);
         showError(error.message);
-        hideLoading();
     } finally {
         isLoading = false;
+        hideLoading();
     }
 }
 
 // 영화 표시
 function displayMovies(movies, append = false) {
-    if (!append) {
-        moviesContainer.innerHTML = '';
-    }
+    let movieGrid = moviesContainer.querySelector('.movie-grid');
     
-    let movieGrid = append ? moviesContainer.querySelector('.movie-grid') : null;
     if (!movieGrid) {
         movieGrid = document.createElement('div');
         movieGrid.className = 'movie-grid';
         moviesContainer.appendChild(movieGrid);
+    } else if (!append) {
+        movieGrid.innerHTML = '';
     }
 
     movies.forEach(movie => {
@@ -379,72 +383,25 @@ function initializeApp() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     window.addEventListener('scroll', handleScroll);
-    initTheme(); // 테마 초기화
     
-    // 서버 연결 유지 기능 시작
-    keepAlive();
-
-    // 초기 영화 로드
-    fetchMovies();
-
-    // 이벤트 리스너 설정
-    releaseStatusSelect.addEventListener('change', () => {
-        fetchMovies(true);
-    });
-
-    countrySelect.addEventListener('change', () => {
-        fetchMovies(true);
-    });
-
-    sortSelect.addEventListener('change', () => {
-        fetchMovies(true);
-    });
-
-    // 장르 체크박스 이벤트 리스너
-    document.querySelectorAll('.genre-checkboxes input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const label = checkbox.parentElement;
-            if (checkbox.checked) {
-                label.classList.add('selected');
-            } else {
-                label.classList.remove('selected');
-            }
-            fetchMovies(true);
-        });
-    });
-
-    // 검색 폼 이벤트 리스너
+    // 필터 변경 이벤트 리스너
     searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        searchQuery = searchInput.value;
-        fetchMovies(true);
+        searchQuery = searchInput.value.trim();
+        handleFilterChange();
     });
 
-    // 영화관/스트리밍 링크 버튼 추가
-    const headerRight = document.querySelector('.header-right');
-    if (headerRight) {
-        const ticketLinks = document.createElement('div');
-        ticketLinks.className = 'ticket-links';
-        
-        const links = [
-            { name: 'CGV', url: 'http://www.cgv.co.kr', icon: '🎬' },
-            { name: '롯데시네마', url: 'https://www.lottecinema.co.kr', icon: '🎥' },
-            { name: '메가박스', url: 'https://www.megabox.co.kr', icon: '🎦' },
-            { name: '넷플릭스', url: 'https://www.netflix.com/kr', icon: '🍿' }
-        ];
-        
-        links.forEach(link => {
-            const button = document.createElement('a');
-            button.href = link.url;
-            button.className = 'ticket-link-button';
-            button.target = '_blank';
-            button.rel = 'noopener noreferrer';
-            button.innerHTML = `${link.icon} ${link.name}`;
-            ticketLinks.appendChild(button);
-        });
-        
-        headerRight.appendChild(ticketLinks);
-    }
+    countrySelect.addEventListener('change', handleFilterChange);
+    sortSelect.addEventListener('change', handleFilterChange);
+    releaseStatusSelect.addEventListener('change', handleFilterChange);
+    
+    document.querySelectorAll('.genre-checkboxes input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', handleFilterChange);
+    });
+
+    initTheme();
+    fetchMovies(true);
+    keepAlive();
 }
 
 // DOMContentLoaded 이벤트에서 초기화 함수 호출
