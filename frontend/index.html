@@ -6,16 +6,8 @@
     <title>Movie Explorer</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .kakao_ad_area {
-            position: fixed;
-            top: 50%;
-            left: 50px;
-            transform: translateY(-50%); /* 화면 가운데에 수직 정렬 */
-            z-index: 999; /* 다른 콘텐츠 위에 표시되도록 */
-        }
-    </style>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7625170441500776" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7625170441500776"
+         crossorigin="anonymous"></script>
 </head>
 <body>
     <header>
@@ -101,12 +93,22 @@
 
         <div id="movies-container" class="movies-grid"></div>
         
-        <!-- 카카오 광고 영역 -->
-        <ins class="kakao_ad_area" style="display:none;"
-            data-ad-unit="DAN-9Ml6MvbhA5Q2uxDz"
-            data-ad-width="160"
-            data-ad-height="600"></ins>
-        
+        <!-- 데스크톱 광고 영역 -->
+        <div class="desktop-ad">
+            <ins class="kakao_ad_area" style="display:none;"
+                data-ad-unit = "DAN-9Ml6MvbhA5Q2uxDz"
+                data-ad-width = "160"
+                data-ad-height = "600"></ins>
+        </div>
+
+        <!-- 모바일 광고 영역 -->
+        <div class="mobile-ad">
+            <ins class="kakao_ad_area" style="display:none;"
+                data-ad-unit = "DAN-hBHpjbyY1PurVbPR"
+                data-ad-width = "320"
+                data-ad-height = "50"></ins>
+        </div>
+
         <div id="pagination" class="pagination"></div>
     </div>
 
@@ -130,9 +132,41 @@
         </div>
     </div>
 
-    <script src="app.js" type="module"></script>
+    <style>
+        /* 데스크톱에서는 모바일 광고 숨기기 */
+        .mobile-ad {
+            display: none;
+        }
+        
+        /* 모바일에서는 데스크톱 광고 숨기기 */
+        @media screen and (max-width: 768px) {
+            .desktop-ad {
+                display: none;
+            }
+            .mobile-ad {
+                display: block;
+                margin: 20px auto;
+            }
+        }
+    </style>
 
+    <script src="app.js" type="module"></script>
     <!-- 카카오 광고 스크립트 -->
     <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
+<!-- Google AdSense 광고 시작 -->
+<div id="adsense-container">
+    <!-- 여기에 Google AdSense 광고 코드를 삽입하세요 -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="XXXXXXXXXX"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+<!-- Google AdSense 광고 끝 -->    
 </body>
 </html>
