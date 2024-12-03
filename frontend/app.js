@@ -9,13 +9,39 @@ const countrySelect = document.getElementById('country-select');
 const sortSelect = document.getElementById('sort-select');
 const releaseStatusSelect = document.getElementById('release-status-select');
 let searchQuery = '';
+let isLoading = false;
+let isMobile = window.innerWidth <= 768;
+let hasMorePages = true;
+
+// 모바일 여부 체크 함수
+function checkMobile() {
+    isMobile = window.innerWidth <= 768;
+    paginationContainer.style.display = isMobile ? 'none' : 'flex';
+}
+
+// 스크롤 이벤트 핸들러
+function handleScroll() {
+    if (!isMobile || isLoading || !hasMorePages) return;
+
+    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollTop = window.scrollY;
+    const clientHeight = document.documentElement.clientHeight;
+
+    if (scrollHeight - scrollTop - clientHeight < 100) {
+        currentPage++;
+        fetchMovies(false, true);
+    }
+}
 
 // 영화 데이터 가져오기
-async function fetchMovies(resetPage = false) {
+async function fetchMovies(resetPage = false, append = false) {
     if (resetPage) {
         currentPage = 1;
+        hasMorePages = true;
     }
 
+    if (isLoading) return;
+    isLoading = true;
     showLoading();
 
     try {
@@ -60,19 +86,27 @@ async function fetchMovies(resetPage = false) {
         const data = await response.json();
         
         if (data.results.length === 0) {
-            moviesContainer.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
-            paginationContainer.innerHTML = '';
+            if (!append) {
+                moviesContainer.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
+                paginationContainer.innerHTML = '';
+            }
+            hasMorePages = false;
             return;
         }
 
-        displayMovies(data.results);
-        updatePagination(data.total_pages);
+        hasMorePages = currentPage < data.total_pages;
+        displayMovies(data.results, append);
+        if (!isMobile) {
+            updatePagination(data.total_pages);
+        }
         hideLoading();
 
     } catch (error) {
         console.error('Error fetching movies:', error);
         showError(error.message);
         hideLoading();
+    } finally {
+        isLoading = false;
     }
 }
 
@@ -136,11 +170,15 @@ function addPageButton(pageNum, label = pageNum) {
 }
 
 // 영화 표시
-function displayMovies(movies) {
-    moviesContainer.innerHTML = '';
+function displayMovies(movies, append = false) {
+    if (!append) {
+        moviesContainer.innerHTML = '';
+    }
     
-    const movieGrid = document.createElement('div');
-    movieGrid.className = 'movie-grid';
+    const movieGrid = append ? moviesContainer.querySelector('.movie-grid') : document.createElement('div');
+    if (!append) {
+        movieGrid.className = 'movie-grid';
+    }
 
     movies.forEach(movie => {
         const movieCard = document.createElement('div');
@@ -175,10 +213,13 @@ function displayMovies(movies) {
         `;
 
         movieCard.addEventListener('click', () => showMovieDetails(movie.id));
-        movieGrid.appendChild(movieCard);
+        if (append) {
+            movieGrid.appendChild(movieCard);
+        } else {
+            movieGrid.appendChild(movieCard);
+            moviesContainer.appendChild(movieGrid);
+        }
     });
-
-    moviesContainer.appendChild(movieGrid);
 }
 
 // 영화 요소 생성
@@ -380,11 +421,14 @@ function keepAlive() {
                 'Pragma': 'no-cache'
             }
         }).catch(error => console.log('Keep-alive request failed:', error));
-    }, 300000);
+    }, 480000);
 }
 
 // 초기화 함수
 function initializeApp() {
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    window.addEventListener('scroll', handleScroll);
     initTheme(); // 테마 초기화
     
     // 서버 연결 유지 기능 시작
