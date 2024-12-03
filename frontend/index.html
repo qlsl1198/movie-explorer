@@ -25,74 +25,6 @@
     </header>
 
     <div class="container">
-        <div class="filters">
-            <form id="search-form" class="search-box">
-                <input type="text" id="search-input" placeholder="영화 검색...">
-                <button type="submit">검색</button>
-            </form>
-
-            <div class="filter-group">
-                <label>개봉 상태:</label>
-                <select id="release-status-select">
-                    <option value="all">전체</option>
-                    <option value="released">개봉작</option>
-                    <option value="upcoming">개봉예정작</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>장르:</label>
-                <div class="genre-checkboxes">
-                    <label><input type="checkbox" name="genre" value="28"> 액션</label>
-                    <label><input type="checkbox" name="genre" value="12"> 모험</label>
-                    <label><input type="checkbox" name="genre" value="16"> 애니메이션</label>
-                    <label><input type="checkbox" name="genre" value="35"> 코미디</label>
-                    <label><input type="checkbox" name="genre" value="80"> 범죄</label>
-                    <label><input type="checkbox" name="genre" value="99"> 다큐멘터리</label>
-                    <label><input type="checkbox" name="genre" value="18"> 드라마</label>
-                    <label><input type="checkbox" name="genre" value="10751"> 가족</label>
-                    <label><input type="checkbox" name="genre" value="14"> 판타지</label>
-                    <label><input type="checkbox" name="genre" value="36"> 역사</label>
-                    <label><input type="checkbox" name="genre" value="27"> 공포</label>
-                    <label><input type="checkbox" name="genre" value="10402"> 음악</label>
-                    <label><input type="checkbox" name="genre" value="9648"> 미스터리</label>
-                    <label><input type="checkbox" name="genre" value="10749"> 로맨스</label>
-                    <label><input type="checkbox" name="genre" value="878"> SF</label>
-                    <label><input type="checkbox" name="genre" value="10770"> TV 영화</label>
-                    <label><input type="checkbox" name="genre" value="53"> 스릴러</label>
-                    <label><input type="checkbox" name="genre" value="10752"> 전쟁</label>
-                    <label><input type="checkbox" name="genre" value="37"> 서부</label>
-                </div>
-            </div>
-
-            <select id="country-select">
-                <option value="">모든 국가</option>
-                <option value="KR">한국</option>
-                <option value="US">미국</option>
-                <option value="JP">일본</option>
-                <option value="CN">중국</option>
-                <option value="GB">영국</option>
-                <option value="FR">프랑스</option>
-                <option value="DE">독일</option>
-                <option value="IT">이탈리아</option>
-                <option value="ES">스페인</option>
-                <option value="IN">인도</option>
-                <option value="CA">캐나다</option>
-                <option value="AU">호주</option>
-                <option value="BR">브라질</option>
-                <option value="MX">멕시코</option>
-                <option value="RU">러시아</option>
-            </select>
-
-            <select id="sort-select">
-                <option value="release_date.desc">최신순</option>
-                <option value="vote_average.desc">평점순</option>
-                <option value="popularity.desc">인기순</option>
-            </select>
-        </div>
-
-        <div id="movies-container" class="movies-grid"></div>
-        
         <!-- 데스크톱 광고 영역 -->
         <div class="desktop-ad">
             <ins class="kakao_ad_area" style="display:none;"
@@ -101,15 +33,85 @@
                 data-ad-height = "600"></ins>
         </div>
 
-        <!-- 모바일 광고 영역 -->
-        <div class="mobile-ad">
-            <ins class="kakao_ad_area" style="display:none;"
-                data-ad-unit = "DAN-hBHpjbyY1PurVbPR"
-                data-ad-width = "320"
-                data-ad-height = "50"></ins>
-        </div>
+        <div class="main-content">
+            <div class="filters">
+                <form id="search-form" class="search-box">
+                    <input type="text" id="search-input" placeholder="영화 검색...">
+                    <button type="submit">검색</button>
+                </form>
 
-        <div id="pagination" class="pagination"></div>
+                <div class="filter-group">
+                    <label>개봉 상태:</label>
+                    <select id="release-status-select">
+                        <option value="all">전체</option>
+                        <option value="released">개봉작</option>
+                        <option value="upcoming">개봉예정작</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>장르:</label>
+                    <div class="genre-checkboxes">
+                        <label><input type="checkbox" name="genre" value="28"> 액션</label>
+                        <label><input type="checkbox" name="genre" value="12"> 모험</label>
+                        <label><input type="checkbox" name="genre" value="16"> 애니메이션</label>
+                        <label><input type="checkbox" name="genre" value="35"> 코미디</label>
+                        <label><input type="checkbox" name="genre" value="80"> 범죄</label>
+                        <label><input type="checkbox" name="genre" value="99"> 다큐멘터리</label>
+                        <label><input type="checkbox" name="genre" value="18"> 드라마</label>
+                        <label><input type="checkbox" name="genre" value="10751"> 가족</label>
+                        <label><input type="checkbox" name="genre" value="14"> 판타지</label>
+                        <label><input type="checkbox" name="genre" value="36"> 역사</label>
+                        <label><input type="checkbox" name="genre" value="27"> 공포</label>
+                        <label><input type="checkbox" name="genre" value="10402"> 음악</label>
+                        <label><input type="checkbox" name="genre" value="9648"> 미스터리</label>
+                        <label><input type="checkbox" name="genre" value="10749"> 로맨스</label>
+                        <label><input type="checkbox" name="genre" value="878"> SF</label>
+                        <label><input type="checkbox" name="genre" value="10770"> TV 영화</label>
+                        <label><input type="checkbox" name="genre" value="53"> 스릴러</label>
+                        <label><input type="checkbox" name="genre" value="10752"> 전쟁</label>
+                        <label><input type="checkbox" name="genre" value="37"> 서부</label>
+                    </div>
+                </div>
+
+                <select id="country-select">
+                    <option value="">모든 국가</option>
+                    <option value="KR">한국</option>
+                    <option value="US">미국</option>
+                    <option value="JP">일본</option>
+                    <option value="CN">중국</option>
+                    <option value="GB">영국</option>
+                    <option value="FR">프랑스</option>
+                    <option value="DE">독일</option>
+                    <option value="IT">이탈리아</option>
+                    <option value="ES">스페인</option>
+                    <option value="IN">인도</option>
+                    <option value="CA">캐나다</option>
+                    <option value="AU">호주</option>
+                    <option value="BR">브라질</option>
+                    <option value="MX">멕시코</option>
+                    <option value="RU">러시아</option>
+                </select>
+
+                <select id="sort-select">
+                    <option value="release_date.desc">최신순</option>
+                    <option value="vote_average.desc">평점순</option>
+                    <option value="popularity.desc">인기순</option>
+                </select>
+            </div>
+
+            <div id="movies-container" class="movies-grid"></div>
+
+            <!-- 모바일 광고 영역 -->
+            <div class="mobile-ad">
+                <ins class="kakao_ad_area" style="display:none;"
+                    data-ad-unit = "DAN-hBHpjbyY1PurVbPR"
+                    data-ad-width = "320"
+                    data-ad-height = "50"></ins>
+            </div>
+
+            <div id="pagination" class="pagination"></div>
+        </div>
     </div>
 
     <div id="movie-modal" class="modal">
@@ -138,6 +140,30 @@
             display: none;
         }
         
+        /* 컨테이너 레이아웃 수정 */
+        .container {
+            position: relative;
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 데스크톱 광고 스타일 */
+        .desktop-ad {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            flex-shrink: 0;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
         /* 모바일에서는 데스크톱 광고 숨기기 */
         @media screen and (max-width: 768px) {
             .desktop-ad {
@@ -146,6 +172,10 @@
             .mobile-ad {
                 display: block;
                 margin: 20px auto;
+            }
+            .container {
+                display: block;
+                padding: 10px;
             }
         }
     </style>
