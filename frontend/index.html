@@ -6,8 +6,16 @@
     <title>Movie Explorer</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7625170441500776"
-         crossorigin="anonymous"></script>
+    <style>
+        .kakao_ad_area {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%); /* 화면 가운데에 수직 정렬 */
+            z-index: 999; /* 다른 콘텐츠 위에 표시되도록 */
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7625170441500776" crossorigin="anonymous"></script>
 </head>
 <body>
     <header>
@@ -95,9 +103,9 @@
         
         <!-- 카카오 광고 영역 -->
         <ins class="kakao_ad_area" style="display:none;"
-            data-ad-unit = "DAN-9Ml6MvbhA5Q2uxDz"
-            data-ad-width = "160"
-            data-ad-height = "600"></ins>
+            data-ad-unit="DAN-9Ml6MvbhA5Q2uxDz"
+            data-ad-width="160"
+            data-ad-height="600"></ins>
         
         <div id="pagination" class="pagination"></div>
     </div>
