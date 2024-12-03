@@ -12,15 +12,6 @@ let searchQuery = '';
 let isLoading = false;
 let isMobile = window.innerWidth <= 768;
 let hasMorePages = true;
-let totalResults = 0;
-
-// 필터 변경 이벤트 핸들러
-function handleFilterChange() {
-    currentPage = 1;
-    hasMorePages = true;
-    totalResults = 0;
-    fetchMovies(true);
-}
 
 // 모바일 여부 체크 함수
 function checkMobile() {
@@ -36,8 +27,8 @@ function handleScroll() {
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const clientHeight = document.documentElement.clientHeight;
 
-    // 스크롤이 하단에서 200px 이내일 때 다음 페이지 로드
     if (scrollHeight - scrollTop - clientHeight < 200) {
+        currentPage++;
         fetchMovies(false, true);
     }
 }
@@ -47,11 +38,9 @@ async function fetchMovies(resetPage = false, append = false) {
     if (resetPage) {
         currentPage = 1;
         hasMorePages = true;
-        totalResults = 0;
     }
 
-    if (isLoading || (!append && !resetPage && !hasMorePages)) return;
-    
+    if (isLoading) return;
     isLoading = true;
     showLoading();
 
@@ -71,15 +60,13 @@ async function fetchMovies(resetPage = false, append = false) {
             params.append('genre', selectedGenres);
         }
 
-        if (countrySelect.value && countrySelect.value !== 'all') {
+        if (countrySelect.value !== 'all') {
             params.append('region', countrySelect.value);
         }
 
         if (searchQuery) {
             params.append('query', searchQuery);
         }
-
-        console.log('Fetching movies:', currentPage, append ? 'append' : 'reset');
 
         const response = await fetch(`/api/movies?${params}`);
         if (!response.ok) {
@@ -88,7 +75,7 @@ async function fetchMovies(resetPage = false, append = false) {
 
         const data = await response.json();
         
-        if (!data.results || data.results.length === 0) {
+        if (data.results.length === 0) {
             if (!append) {
                 moviesContainer.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
                 paginationContainer.innerHTML = '';
@@ -97,20 +84,13 @@ async function fetchMovies(resetPage = false, append = false) {
             return;
         }
 
-        totalResults = data.total_results || 0;
-        const maxPages = Math.min(Math.ceil(totalResults / moviesPerPage), 100);
+        const maxPages = Math.min(data.total_pages, 100);
         hasMorePages = currentPage < maxPages;
-
-        if (resetPage) {
-            moviesContainer.innerHTML = '';
-        }
 
         displayMovies(data.results, append);
         
         if (!isMobile) {
             updatePagination(maxPages);
-        } else if (hasMorePages) {
-            currentPage++;
         }
 
     } catch (error) {
@@ -124,14 +104,15 @@ async function fetchMovies(resetPage = false, append = false) {
 
 // 영화 표시
 function displayMovies(movies, append = false) {
+    if (!append) {
+        moviesContainer.innerHTML = '';
+    }
+
     let movieGrid = moviesContainer.querySelector('.movie-grid');
-    
     if (!movieGrid) {
         movieGrid = document.createElement('div');
         movieGrid.className = 'movie-grid';
         moviesContainer.appendChild(movieGrid);
-    } else if (!append) {
-        movieGrid.innerHTML = '';
     }
 
     movies.forEach(movie => {
@@ -150,7 +131,6 @@ function displayMovies(movies, append = false) {
               })
             : '미정';
 
-        // 제목 표시 로직
         const displayTitle = movie.title;
         const originalTitle = movie.original_title !== movie.title ? movie.original_title : '';
         
@@ -167,44 +147,60 @@ function displayMovies(movies, append = false) {
         `;
 
         movieCard.addEventListener('click', () => showMovieDetails(movie.id));
-        if (append) {
-            movieGrid.appendChild(movieCard);
-        } else {
-            movieGrid.appendChild(movieCard);
-            moviesContainer.appendChild(movieGrid);
-        }
+        movieGrid.appendChild(movieCard);
     });
 }
 
-// 영화 요소 생성
-function createMovieElement(movie) {
-    const movieElement = document.createElement('div');
-    movieElement.className = 'movie-card';
+// 페이지네이션 업데이트
+function updatePagination(totalPages) {
+    paginationContainer.innerHTML = '';
     
-    const posterUrl = movie.poster_path 
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : 'https://via.placeholder.com/500x750?text=No+Poster';
-    
-    const releaseYear = movie.release_date 
-        ? new Date(movie.release_date).getFullYear() 
-        : '미상';
+    if (totalPages <= 1) {
+        return;
+    }
 
-    const voteAverage = movie.vote_average 
-        ? movie.vote_average.toFixed(1) 
-        : '평점 없음';
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-    movieElement.innerHTML = `
-        <img src="${posterUrl}" alt="${movie.title}" loading="lazy"
-             onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster'">
-        <div class="movie-info">
-            <h3>${movie.title}</h3>
-            <p class="year">${releaseYear}</p>
-            <p class="rating"> ${voteAverage}</p>
-        </div>
-    `;
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
 
-    movieElement.addEventListener('click', () => showMovieDetails(movie.id));
-    return movieElement;
+    if (startPage > 1) {
+        addPageButton(1, '처음');
+        if (startPage > 2) {
+            paginationContainer.appendChild(document.createTextNode('...'));
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        addPageButton(i);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationContainer.appendChild(document.createTextNode('...'));
+        }
+        addPageButton(totalPages, '마지막');
+    }
+}
+
+// 페이지 버튼 추가
+function addPageButton(pageNum, label = pageNum) {
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.classList.add('page-button');
+    if (pageNum === currentPage) {
+        button.classList.add('active');
+    }
+    button.addEventListener('click', () => {
+        if (pageNum !== currentPage) {
+            currentPage = pageNum;
+            fetchMovies();
+        }
+    });
+    paginationContainer.appendChild(button);
 }
 
 // 영화 상세 정보 표시
@@ -383,20 +379,20 @@ function initializeApp() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     window.addEventListener('scroll', handleScroll);
-    
-    // 필터 변경 이벤트 리스너
+
+    // 이벤트 리스너 설정
     searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
         searchQuery = searchInput.value.trim();
-        handleFilterChange();
+        fetchMovies(true);
     });
 
-    countrySelect.addEventListener('change', handleFilterChange);
-    sortSelect.addEventListener('change', handleFilterChange);
-    releaseStatusSelect.addEventListener('change', handleFilterChange);
+    countrySelect.addEventListener('change', () => fetchMovies(true));
+    sortSelect.addEventListener('change', () => fetchMovies(true));
+    releaseStatusSelect.addEventListener('change', () => fetchMovies(true));
     
     document.querySelectorAll('.genre-checkboxes input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', handleFilterChange);
+        checkbox.addEventListener('change', () => fetchMovies(true));
     });
 
     initTheme();
