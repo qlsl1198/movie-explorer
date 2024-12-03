@@ -12,6 +12,7 @@ let searchQuery = '';
 let isLoading = false;
 let isMobile = window.innerWidth <= 768;
 let hasMorePages = true;
+let isScrolling = false;
 
 // 모바일 여부 체크 함수
 function checkMobile() {
@@ -26,11 +27,24 @@ function handleScroll() {
     const scrollHeight = document.documentElement.scrollHeight;
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const clientHeight = document.documentElement.clientHeight;
+    const scrollThreshold = 100;
 
-    if (scrollHeight - scrollTop - clientHeight < 200) {
-        currentPage++;
-        fetchMovies(false, true);
+    // 스크롤이 하단에 도달했는지 확인
+    if (scrollHeight - scrollTop - clientHeight <= scrollThreshold) {
+        if (!isScrolling) {
+            isScrolling = true;
+            loadMoreMovies();
+        }
     }
+}
+
+// 추가 영화 로드
+async function loadMoreMovies() {
+    if (isLoading || !hasMorePages) return;
+    
+    currentPage++;
+    await fetchMovies(false, true);
+    isScrolling = false;
 }
 
 // 영화 데이터 가져오기
@@ -38,6 +52,7 @@ async function fetchMovies(resetPage = false, append = false) {
     if (resetPage) {
         currentPage = 1;
         hasMorePages = true;
+        moviesContainer.innerHTML = '';
     }
 
     if (isLoading) return;
@@ -68,6 +83,8 @@ async function fetchMovies(resetPage = false, append = false) {
             params.append('query', searchQuery);
         }
 
+        console.log('Fetching page:', currentPage, 'append:', append);
+
         const response = await fetch(`/api/movies?${params}`);
         if (!response.ok) {
             throw new Error('영화를 불러오는데 실패했습니다.');
@@ -75,7 +92,7 @@ async function fetchMovies(resetPage = false, append = false) {
 
         const data = await response.json();
         
-        if (data.results.length === 0) {
+        if (!data.results || data.results.length === 0) {
             if (!append) {
                 moviesContainer.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
                 paginationContainer.innerHTML = '';
@@ -84,7 +101,7 @@ async function fetchMovies(resetPage = false, append = false) {
             return;
         }
 
-        const maxPages = Math.min(data.total_pages, 100);
+        const maxPages = Math.min(data.total_pages || 1, 100);
         hasMorePages = currentPage < maxPages;
 
         displayMovies(data.results, append);
@@ -96,6 +113,7 @@ async function fetchMovies(resetPage = false, append = false) {
     } catch (error) {
         console.error('Error fetching movies:', error);
         showError(error.message);
+        hasMorePages = false;
     } finally {
         isLoading = false;
         hideLoading();
@@ -104,15 +122,14 @@ async function fetchMovies(resetPage = false, append = false) {
 
 // 영화 표시
 function displayMovies(movies, append = false) {
-    if (!append) {
-        moviesContainer.innerHTML = '';
-    }
-
     let movieGrid = moviesContainer.querySelector('.movie-grid');
+    
     if (!movieGrid) {
         movieGrid = document.createElement('div');
         movieGrid.className = 'movie-grid';
         moviesContainer.appendChild(movieGrid);
+    } else if (!append) {
+        movieGrid.innerHTML = '';
     }
 
     movies.forEach(movie => {
