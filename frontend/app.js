@@ -417,33 +417,6 @@ function initializeApp() {
     keepAlive();
 }
 
- // 영화관/스트리밍 링크 버튼 추가
-    const headerRight = document.querySelector('.header-right');
-    if (headerRight) {
-        const ticketLinks = document.createElement('div');
-        ticketLinks.className = 'ticket-links';
-        
-        const links = [
-            { name: 'CGV', url: 'http://www.cgv.co.kr', icon: '🎬' },
-            { name: '롯데시네마', url: 'https://www.lottecinema.co.kr', icon: '🎥' },
-            { name: '메가박스', url: 'https://www.megabox.co.kr', icon: '🎦' },
-            { name: '넷플릭스', url: 'https://www.netflix.com/kr', icon: '🍿' }
-        ];
-        
-        links.forEach(link => {
-            const button = document.createElement('a');
-            button.href = link.url;
-            button.className = 'ticket-link-button';
-            button.target = '_blank';
-            button.rel = 'noopener noreferrer';
-            button.innerHTML = `${link.icon} ${link.name}`;
-            ticketLinks.appendChild(button);
-        });
-        
-        headerRight.appendChild(ticketLinks);
-    }
-}
-
 
 // DOMContentLoaded 이벤트에서 초기화 함수 호출
 document.addEventListener('DOMContentLoaded', initializeApp);
