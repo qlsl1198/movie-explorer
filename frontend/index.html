@@ -141,39 +141,40 @@
         .mobile-ad {
             display: none;
         }
-        
+
         /* 컨테이너 레이아웃 수정 */
         .container {
             position: relative;
-            display: block;
+            display: flex; /* ✅ 수정됨: 광고와 본문을 옆으로 배치 */
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
-    
+
         /* 데스크톱 광고 스타일 */
         .desktop-ad {
-            display: block; /* 광고가 보이도록 설정 */
+            display: block;
             position: sticky;
             top: 20px;
             height: fit-content;
             flex-shrink: 0;
+            width: 160px; /* ✅ 광고 너비 지정 */
         }
-    
+
         /* 메인 컨텐츠 영역 */
         .main-content {
             flex: 1;
             min-width: 0;
         }
-        
+
         /* 모바일에서는 데스크톱 광고 숨기기 */
         @media screen and (max-width: 768px) {
             .desktop-ad {
-                display: none; /* 모바일에서 데스크톱 광고 숨김 */
+                display: none;
             }
             .mobile-ad {
-                display: block; /* 모바일에서 광고 보이도록 설정 */
+                display: block;
                 margin: 20px auto;
             }
             .container {
@@ -184,8 +185,6 @@
     </style>
 
     <script src="app.js" type="module"></script>
-    <!-- 카카오 광고 스크립트 -->
     <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-
 </body>
 </html>
