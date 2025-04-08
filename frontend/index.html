@@ -6,8 +6,6 @@
     <title>Movie Explorer</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7625170441500776"
-         crossorigin="anonymous"></script>
 </head>
 <body>
     <header>
@@ -24,16 +22,8 @@
         </div>
     </header>
 
-    <div class="container">
-        <!-- 데스크톱 광고 영역 -->
-        <div class="desktop-ad">
-            <ins class="kakao_ad_area" style="display:block;"
-                 data-ad-unit="DAN-9Ml6MvbhA5Q2uxDz"
-                 data-ad-width="160"
-                 data-ad-height="600"></ins>
-            <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-        </div>
-
+    <div class="layout-container">
+        <!-- 본문 내용 -->
         <div class="main-content">
             <div class="filters">
                 <form id="search-form" class="search-box">
@@ -53,7 +43,7 @@
                 <div class="filter-group">
                     <label>장르:</label>
                     <div class="genre-checkboxes">
-                        <!-- 장르 체크박스들 생략 -->
+                        <!-- 체크박스 생략 -->
                     </div>
                 </div>
 
@@ -61,7 +51,6 @@
                     <option value="">모든 국가</option>
                     <option value="KR">한국</option>
                     <option value="US">미국</option>
-                    <!-- 국가 목록 생략 -->
                 </select>
 
                 <select id="sort-select">
@@ -72,18 +61,28 @@
             </div>
 
             <div id="movies-container" class="movies-grid"></div>
-
-            <!-- 모바일 광고 영역 -->
-            <div class="mobile-ad">
-                <ins class="kakao_ad_area" style="display:none;"
-                    data-ad-unit="DAN-hBHpjbyY1PurVbPR"
-                    data-ad-width="320"
-                    data-ad-height="50"></ins>
-                <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-            </div>
-
             <div id="pagination" class="pagination"></div>
         </div>
+
+        <!-- Kakao 애드핏 데스크톱 광고 -->
+        <aside class="adsense-container desktop-ad">
+            <ins class="kakao_ad_area"
+                style="display:none;"
+                data-ad-unit="DAN-9Ml6MvbhA5Q2uxDz"
+                data-ad-width="160"
+                data-ad-height="600"></ins>
+            <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+        </aside>
+    </div>
+
+    <!-- Kakao 애드핏 모바일 광고 -->
+    <div class="adsense-container mobile-ad">
+        <ins class="kakao_ad_area"
+            style="display:none;"
+            data-ad-unit="DAN-hBHpjbyY1PurVbPR"
+            data-ad-width="320"
+            data-ad-height="50"></ins>
+        <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
     </div>
 
     <div id="movie-modal" class="modal">
@@ -106,26 +105,15 @@
         </div>
     </div>
 
+    <script src="app.js" type="module"></script>
+
     <style>
-        /* 광고 및 레이아웃 스타일 */
-        .mobile-ad {
-            display: none;
-        }
-
-        .container {
-            display: flex; /* 광고 + 본문 나란히 */
-            gap: 20px;
-            max-width: 1400px;
+        .layout-container {
+            display: flex;
+            max-width: 1200px;
             margin: 0 auto;
+            gap: 20px;
             padding: 20px;
-        }
-
-        .desktop-ad {
-            display: block;
-            position: sticky;
-            top: 20px;
-            width: 160px; /* 광고 너비 */
-            flex-shrink: 0;
         }
 
         .main-content {
@@ -133,25 +121,31 @@
             min-width: 0;
         }
 
+        .adsense-container.desktop-ad {
+            position: sticky;
+            top: 20px;
+            flex-shrink: 0;
+        }
+
+        .mobile-ad {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+
         @media screen and (max-width: 768px) {
-            .desktop-ad {
+            .layout-container {
+                flex-direction: column;
+            }
+
+            .adsense-container.desktop-ad {
                 display: none;
             }
 
             .mobile-ad {
                 display: block;
-                margin: 20px auto;
-            }
-
-            .container {
-                display: block;
-                padding: 10px;
             }
         }
     </style>
-
-    <script src="app.js" type="module"></script>
-    <!-- 광고 스크립트 한 번만 -->
-    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
 </body>
 </html>
