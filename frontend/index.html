@@ -137,7 +137,7 @@
     </div>
 
     <style>
-        /* 데스크톱에서는 모바일 광고 숨기기 */
+        /* 모바일 광고 숨기기 */
         .mobile-ad {
             display: none;
         }
@@ -151,16 +151,16 @@
             margin: 0 auto;
             padding: 20px;
         }
-
+    
         /* 데스크톱 광고 스타일 */
         .desktop-ad {
+            display: block; /* 광고가 보이도록 설정 */
             position: sticky;
             top: 20px;
             height: fit-content;
             flex-shrink: 0;
         }
-        
-
+    
         /* 메인 컨텐츠 영역 */
         .main-content {
             flex: 1;
@@ -170,10 +170,10 @@
         /* 모바일에서는 데스크톱 광고 숨기기 */
         @media screen and (max-width: 768px) {
             .desktop-ad {
-                display: none;
+                display: none; /* 모바일에서 데스크톱 광고 숨김 */
             }
             .mobile-ad {
-                display: block;
+                display: block; /* 모바일에서 광고 보이도록 설정 */
                 margin: 20px auto;
             }
             .container {
@@ -181,7 +181,6 @@
                 padding: 10px;
             }
         }
-        
     </style>
 
     <script src="app.js" type="module"></script>
